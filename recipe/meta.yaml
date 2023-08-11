@@ -1,16 +1,17 @@
 {% set name = "azure-c-shared-utility" %}
-{% set version = "2020.12.09" %}
+{% set version = "2022.08.04" %}
+{% set tag = "LTS_07_2022_Ref02" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://github.com/Azure/azure-c-shared-utility/archive/{{ version.replace('.', '-') }}.tar.gz
-    sha256: 8cf59c75666c4cdffc2f672598668e6ce474c857e1be1ccebeee3edd50cbf69b
+  - url: https://github.com/Azure/azure-c-shared-utility/archive/{{ tag }}.tar.gz
+    sha256: cb2146878a705af76ab2fb7e941f15474db04326de4c6095c97f925cf442410b
 
 build:
-  number: 2
+  number: 0
   run_exports:
     - {{ pin_subpackage(name, max_pin='x.x.x') }}
 
