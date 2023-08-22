@@ -1,26 +1,36 @@
 {% set name = "azure-c-shared-utility" %}
-{% set version = "2020.12.09" %}
+# tag: LTS_MM_YYYY_RefRR --> version: YYYY.MM.refRR
+{% set version = "2022.07.ref02" %}
+{% set tag = "LTS_07_2022_Ref02" %}
+# The Git tags originally used the format YYYY-MM-DD, which we adopted for this
+# recipe. More recent tags are no longer consistent (eg LTS_07_2022_Ref02). To
+# ensure that the latest version is always installed, we created the version
+# string as a rearrangement of the tag name: LTS_MM_YYYY_RefRR --> YYYY.MM.refRR
+#
+# Releases: https://github.com/Azure/azure-c-shared-utility/tags
+# Discussion: https://github.com/conda-forge/azure-c-shared-utility-feedstock/pull/7#discussion_r1301314533
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://github.com/Azure/azure-c-shared-utility/archive/{{ version.replace('.', '-') }}.tar.gz
-    sha256: 8cf59c75666c4cdffc2f672598668e6ce474c857e1be1ccebeee3edd50cbf69b
+  - url: https://github.com/Azure/azure-c-shared-utility/archive/{{ tag }}.tar.gz
+    sha256: cb2146878a705af76ab2fb7e941f15474db04326de4c6095c97f925cf442410b
 
 build:
   number: 0
-  skip: true  # [linux]
   run_exports:
     - {{ pin_subpackage(name, max_pin='x.x.x') }}
 
 requirements:
   build:
     - {{ compiler('c') }}
+    - {{ compiler('cxx') }}  # [linux]
     - cmake
     - make   # [not win]
     - ninja  # [win]
+    - pkg-config  # [unix]
   host:
     # 2022.08.09 is the first backward-incompatible version after
     # azure-macro-utils-c was renamed to macro-utils-c.
@@ -28,6 +38,8 @@ requirements:
     - azure-macro-utils-c <2020.10.29
     - libuuid  # [unix]
     - umock-c
+    - libcurl
+    - curl
   run:
     - azure-macro-utils-c <2020.10.29
     - umock-c
