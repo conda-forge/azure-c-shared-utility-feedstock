@@ -1,5 +1,5 @@
 {% set name = "azure-c-shared-utility" %}
-{% set version = "2022.08.04" %}
+{% set version = "2022.07.ref02" %}
 {% set tag = "LTS_07_2022_Ref02" %}
 # The Git tags originally used the format YYYY-MM-DD, which we adopted for this
 # recipe. More recent tags are no longer consistent (eg LTS_07_2022_Ref02) and
