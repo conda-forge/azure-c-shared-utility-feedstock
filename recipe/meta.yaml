@@ -1,14 +1,14 @@
 {% set name = "azure-c-shared-utility" %}
+# tag: LTS_MM_YYYY_RefRR --> version: YYYY.MM.refRR
 {% set version = "2022.07.ref02" %}
 {% set tag = "LTS_07_2022_Ref02" %}
 # The Git tags originally used the format YYYY-MM-DD, which we adopted for this
-# recipe. More recent tags are no longer consistent (eg LTS_07_2022_Ref02) and
-# can't be used as valid version strings in a conda recipe. For consistency and
-# to ensure that the latest version is always installed, we created the version
-# string as the date of the commit that the tag points to. This obviously isn't
-# ideal, but fortunately this repository doesn't have a fast release cycle
+# recipe. More recent tags are no longer consistent (eg LTS_07_2022_Ref02). To
+# ensure that the latest version is always installed, we created the version
+# string as a rearrangement of the tag name: LTS_MM_YYYY_RefRR --> YYYY.MM.refRR
 #
-# https://github.com/Azure/azure-c-shared-utility/tags
+# Releases: https://github.com/Azure/azure-c-shared-utility/tags
+# Discussion: https://github.com/conda-forge/azure-c-shared-utility-feedstock/pull/7#discussion_r1301314533
 
 package:
   name: {{ name }}
