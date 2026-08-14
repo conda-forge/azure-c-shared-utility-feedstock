@@ -36,8 +36,10 @@ build:
 requirements:
   build:
     - ${{ compiler('c') }}
-    - if: linux
-      then: ${{ compiler('cxx') }}
+    # project() enables CXX by default and azure_iot_build_rules.cmake runs
+    # CHECK_CXX_COMPILER_FLAG unconditionally, so configure needs a C++
+    # compiler on every platform.
+    - ${{ compiler('cxx') }}
     - ${{ stdlib("c") }}
     - cmake
     - if: not win
