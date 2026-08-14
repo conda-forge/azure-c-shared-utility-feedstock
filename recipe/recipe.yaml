@@ -25,6 +25,10 @@ source:
       # aziotsharedutil target, but nothing ever creates that directory, so
       # downstream find_package() users fail at CMake's generate step.
       - patches/0001-export-include-dir-that-exists.patch
+      # CURLOPT_POSTFIELDSIZE is a long option but was passed a bare 0, which
+      # trips libcurl's typecheck macros. The project builds with -Werror, so
+      # this breaks clang-based builds (macOS); gcc and MSVC are unaffected.
+      - patches/0002-curl-postfieldsize-expects-long.patch
 
 build:
   number: 1
