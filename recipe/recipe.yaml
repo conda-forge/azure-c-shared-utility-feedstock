@@ -1,7 +1,4 @@
-{% set name = "azure-c-shared-utility" %}
 # tag: LTS_MM_YYYY_RefRR --> version: YYYY.MM.refRR
-{% set version = "2022.07.ref02" %}
-{% set tag = "LTS_07_2022_Ref02" %}
 # The Git tags originally used the format YYYY-MM-DD, which we adopted for this
 # recipe. More recent tags are no longer consistent (eg LTS_07_2022_Ref02). To
 # ensure that the latest version is always installed, we created the version
@@ -9,52 +6,67 @@
 #
 # Releases: https://github.com/Azure/azure-c-shared-utility/tags
 # Discussion: https://github.com/conda-forge/azure-c-shared-utility-feedstock/pull/7#discussion_r1301314533
+schema_version: 1
+
+context:
+  name: azure-c-shared-utility
+  version: 2022.07.ref02
+  tag: LTS_07_2022_Ref02
 
 package:
-  name: {{ name }}
-  version: {{ version }}
+  name: ${{ name }}
+  version: ${{ version }}
 
 source:
-  - url: https://github.com/Azure/azure-c-shared-utility/archive/{{ tag }}.tar.gz
+  - url: https://github.com/Azure/azure-c-shared-utility/archive/${{ tag }}.tar.gz
     sha256: cb2146878a705af76ab2fb7e941f15474db04326de4c6095c97f925cf442410b
 
 build:
-  number: 0
-  run_exports:
-    - {{ pin_subpackage(name, max_pin='x.x.x') }}
+  number: 1
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}  # [linux]
+    - ${{ compiler('c') }}
+    - if: linux
+      then: ${{ compiler('cxx') }}
     - cmake
-    - make   # [not win]
-    - ninja  # [win]
-    - pkg-config  # [unix]
+    - if: not win
+      then: make
+    - if: win
+      then: ninja
+    - if: unix
+      then: pkg-config
   host:
     # 2022.08.09 is the first backward-incompatible version after
     # azure-macro-utils-c was renamed to macro-utils-c.
     # See: https://github.com/conda-forge/azure-macro-utils-c-feedstock/commit/abca76cfa9b6738d76e44fb5428559d4f245808c
     - azure-macro-utils-c <2020.10.29
-    - libuuid  # [unix]
+    - if: unix
+      then: libuuid
     - umock-c
     - libcurl
     - curl
   run:
     - azure-macro-utils-c <2020.10.29
     - umock-c
+  run_exports:
+    - ${{ pin_subpackage(name, upper_bound='x.x.x') }}
 
-test:
-  commands:
-    - if not exist %PREFIX%\\Library\\bin\\aziotsharedutil.dll exit 1  # [win]
-    - test -f "${PREFIX}/lib/libaziotsharedutil${SHLIB_EXT}"  # [not win]
+tests:
+  - script:
+      - if: win
+        then: if not exist %PREFIX%\\Library\\bin\\aziotsharedutil.dll exit 1
+      - if: not win
+        then: test -f "${PREFIX}/lib/libaziotsharedutil${SHLIB_EXT}"
 
 about:
-  home: https://github.com/Azure/azure-c-shared-utility
   license: MIT
   license_file: LICENSE
   summary: |
     Azure C Shared Utility
+
+
+  homepage: https://github.com/Azure/azure-c-shared-utility
 
 extra:
   recipe-maintainers:
