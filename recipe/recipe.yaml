@@ -20,6 +20,11 @@ package:
 source:
   - url: https://github.com/Azure/azure-c-shared-utility/archive/${{ tag }}.tar.gz
     sha256: cb2146878a705af76ab2fb7e941f15474db04326de4c6095c97f925cf442410b
+    patches:
+      # Upstream exports include/azureiot as the public include directory of the
+      # aziotsharedutil target, but nothing ever creates that directory, so
+      # downstream find_package() users fail at CMake's generate step.
+      - patches/0001-export-include-dir-that-exists.patch
 
 build:
   number: 1
@@ -55,9 +60,16 @@ requirements:
 tests:
   - script:
       - if: win
-        then: if not exist %PREFIX%\\Library\\bin\\aziotsharedutil.dll exit 1
+        then: if not exist %PREFIX%\Library\bin\aziotsharedutil.dll exit 1
       - if: not win
         then: test -f "${PREFIX}/lib/libaziotsharedutil${SHLIB_EXT}"
+      # The exported target must not advertise include/azureiot, which is never
+      # created; doing so breaks find_package() consumers at CMake's generate
+      # step. See patches/0001-export-include-dir-that-exists.patch
+      - if: win
+        then: findstr /C:"include/azureiot" "%PREFIX%\Library\lib\cmake\azure_c_shared_utility\azure_c_shared_utilityTargets.cmake" && exit 1 || exit 0
+      - if: not win
+        then: '! grep -q "include/azureiot" "${PREFIX}/lib/cmake/azure_c_shared_utility/azure_c_shared_utilityTargets.cmake"'
 
 about:
   license: MIT
