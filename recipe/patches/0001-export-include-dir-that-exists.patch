@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xylar Asay-Davis <xylarstorm@gmail.com>
+Date: Fri, 14 Aug 2026 10:16:17 +0200
+Subject: [PATCH] Export an include directory that exists
+
+The exported aziotsharedutil target advertised
+${CMAKE_INSTALL_INCLUDEDIR}/azureiot as its public include directory, but
+that directory is only created by the install(FILES ...) rule on the line
+below, whose file lists (micromock_h_files_full_path, INSTALL_H_FILES) are
+empty unless the test targets are configured. install(FILES) with an empty
+list installs nothing and creates no directory, so the exported target
+referenced a path the package does not ship and downstream
+find_package(azure_c_shared_utility CONFIG) users failed at CMake's generate
+step.
+
+The public headers are installed to ${CMAKE_INSTALL_INCLUDEDIR}/azure_c_shared_utility
+and are included as "azure_c_shared_utility/xlogging.h", so the directory
+that belongs on the include path is ${CMAKE_INSTALL_INCLUDEDIR} itself.
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bb100c7..2737fa4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -699,7 +699,7 @@ install (TARGETS ${targets} EXPORT aziotsharedutilTargets
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
++    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+ )
+ install (FILES ${source_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_c_shared_utility)
+ install (FILES ${micromock_h_files_full_path} ${INSTALL_H_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)

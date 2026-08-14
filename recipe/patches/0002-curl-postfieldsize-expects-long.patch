@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xylar Asay-Davis <xylarstorm@gmail.com>
+Date: Fri, 14 Aug 2026 11:44:01 +0200
+Subject: [PATCH] Pass a long to CURLOPT_POSTFIELDSIZE
+
+CURLOPT_POSTFIELDSIZE is a long option, but this call site passed the bare
+integer literal 0. libcurl's typecheck-gcc.h checks the argument type with
+curlcheck_long(), which on LP64 platforms accepts only long/signed
+long/unsigned long -- int is accepted solely when sizeof(long) ==
+sizeof(int). The int literal therefore fails the check and expands to a call
+to Wcurl_easy_setopt_err_long(), which carries
+__attribute__((warning("curl_easy_setopt expects a long argument"))).
+
+clang reports that as -Wattribute-warning, and the project builds with
+-Werror on all UNIX platforms, so the build fails. Every other long option
+in this file already passes a long (1L) or a long variable; this was the
+only remaining int literal.
+
+gcc does not emit the diagnostic and MSVC never includes typecheck-gcc.h, so
+only clang-based builds (e.g. macOS) were affected.
+---
+ adapters/httpapi_curl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/adapters/httpapi_curl.c b/adapters/httpapi_curl.c
+index f654961..cba08bd 100644
+--- a/adapters/httpapi_curl.c
++++ b/adapters/httpapi_curl.c
+@@ -632,7 +632,7 @@ HTTPAPI_RESULT HTTPAPI_ExecuteRequest(HTTP_HANDLE handle, HTTPAPI_REQUEST_TYPE r
+                                 if (requestType != HTTPAPI_REQUEST_GET)
+                                 {
+                                     if ((curl_easy_setopt(httpHandleData->curl, CURLOPT_POSTFIELDS, (void*)NULL) != CURLE_OK) ||
+-                                        (curl_easy_setopt(httpHandleData->curl, CURLOPT_POSTFIELDSIZE, 0) != CURLE_OK))
++                                        (curl_easy_setopt(httpHandleData->curl, CURLOPT_POSTFIELDSIZE, 0L) != CURLE_OK))
+                                     {
+                                         result = HTTPAPI_SET_OPTION_FAILED;
+                                         LogError("(result = %" PRI_MU_ENUM ")", MU_ENUM_VALUE(HTTPAPI_RESULT, result));
